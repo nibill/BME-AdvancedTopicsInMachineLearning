@@ -1,12 +1,14 @@
 import torch
 from torch.utils.data import Dataset
 import torchvision
-
+from PIL import Image
+import cv2
 
 class MnistPairs(Dataset):
     """Dataset with Mnist pairs."""
 
     def __init__(self, root, train, download, transform=None, order='right', return_original_labels=False):
+    # def __init__(self, ds, transform=None, order='right', return_original_labels=False):  
         """
         Args:
             root (string): Directory to store the downloaded MNIST dataset.
@@ -19,6 +21,9 @@ class MnistPairs(Dataset):
         """
         
         assert order in ['right', 'left'], "Got unexpected order argument. Expected one of ['right', 'left']"
+        self.train = train
+        self.download = download
+        self.transform = transform
         self.order = order
         
         self.return_original_labels = return_original_labels
@@ -53,7 +58,29 @@ class MnistPairs(Dataset):
         #     Your code         #
         #########################
         
-        pass
+        img, target = self.mnist_dataset.data[idx * 2], int(self.mnist_dataset.targets[idx * 2])
+
+        if self.order == 'left':
+            first_image = self.mnist_dataset.data[idx * 2 + 1]
+            first_label = int(self.mnist_dataset.targets[idx * 2 + 1])
+            second_image = self.mnist_dataset.data[idx * 2]
+            second_label = int(self.mnist_dataset.targets[idx * 2])
+            # first_image = Image.fromarray(img[1].numpy(), mode='L')
+            # first_label = target[1]
+            # second_image = Image.fromarray(img[0].numpy(), mode='L')
+            # second_label = target[0]
+        elif self.order == 'right':
+            first_image = self.mnist_dataset.data[idx * 2]
+            first_label = int(self.mnist_dataset.targets[idx * 2])
+            second_image = self.mnist_dataset.data[idx * 2 + 1]
+            second_label = int(self.mnist_dataset.targets[idx * 2 + 1])
+            # first_image = Image.fromarray(img[0].numpy(), mode='L')
+            # first_label = target[0]
+            # second_image = Image.fromarray(img[1].numpy(), mode='L')
+            # second_label = target[1]
+
+        label = (first_label + second_label)
+        image = cv2.hconcat([first_image.numpy(), second_image.numpy()])
         
         #########################
         #     End of your code  #
@@ -62,4 +89,6 @@ class MnistPairs(Dataset):
         if self.return_original_labels:
             return first_image, second_image, label, first_label, second_label
         
-        return first_image, second_image, label
+        return image, label
+
+        # return first_image, second_image, label

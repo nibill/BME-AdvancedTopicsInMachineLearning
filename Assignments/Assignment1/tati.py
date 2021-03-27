@@ -58,30 +58,24 @@ class MnistPairs(Dataset):
         #     Your code         #
         #########################
         
-        img, target = self.mnist_dataset.data[idx], int(self.mnist_dataset.targets[idx])
-
         if self.order == 'left':
-          first_image = self.mnist_dataset.data[idx + 1]
-          first_label = int(self.mnist_dataset.targets[idx + 1])
-          second_image = self.mnist_dataset.data[idx]
-          second_label = int(self.mnist_dataset.targets[idx])
-
+            first_image, first_label = self.mnist_dataset[idx + 1]
+            second_image, second_label = self.mnist_dataset[idx]
         elif self.order == 'right':
-          first_image = self.mnist_dataset.data[idx]
-          first_label = int(self.mnist_dataset.targets[idx])
-          second_image = self.mnist_dataset.data[idx + 1]
-          second_label = int(self.mnist_dataset.targets[idx + 1])
+            first_image, first_label = self.mnist_dataset[idx]
+            second_image, second_label = self.mnist_dataset[idx + 1]
 
         label = (first_label + second_label) % 10
 
         if self.concat == True:
-          concatImage = cv2.hconcat([first_image.numpy(), second_image.numpy()])
+            concatImage = torch.cat((torchvision.transforms.functional.to_tensor(first_image), torchvision.transforms.functional.to_tensor(second_image)), 2)
+            concatImage = torchvision.transforms.functional.to_pil_image(concatImage)
 
-          if self.return_original_labels == False and self.concat == True:
-            return concatImage, label
+            if self.return_original_labels == False and self.concat == True:
+                return concatImage, label
 
-          if self.return_original_labels == True and self.concat == True:
-            return concatImage, label, first_label, second_label
+            if self.return_original_labels == True and self.concat == True:
+                return concatImage, label, first_label, second_label
         
         #########################
         #     End of your code  #

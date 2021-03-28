@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 import torchvision
+from torchvision.transforms import Compose, ToTensor, Normalize
 from PIL import Image
 import cv2
 
@@ -68,9 +69,9 @@ class MnistPairs(Dataset):
         label = (first_label + second_label) % 10
 
         if self.concat == True:
-            concatImage = torch.cat((torchvision.transforms.functional.to_tensor(first_image), torchvision.transforms.functional.to_tensor(second_image)), 2)
-            concatImage = torchvision.transforms.functional.to_pil_image(concatImage)
-
+            concatImage = torch.cat([first_image, second_image], -1)
+            #concatImage = torchvision.transforms.functional.to_pil_image(concatImage)
+            
             if self.return_original_labels == False and self.concat == True:
                 return concatImage, label
 
